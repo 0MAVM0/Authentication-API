@@ -7,9 +7,9 @@ from django.db import models
 import random
 import uuid
 
-ORDINARY_USER, MANAGER, ADMIN = ("ordinary_user", "manager", "admin")
-VIA_EMAIL, VIA_NUMBER = ("via_email", "via_number")
-NEW, CODE_VERIFIED, DONE, PHOTO = ("new", "code_verified", "done", "photo")
+ORDINARY_USER, MANAGER, ADMIN = ('ordinary_user', 'manager', 'admin')
+VIA_EMAIL, VIA_NUMBER = ('via_email', 'via_number')
+NEW, CODE_VERIFIED, DONE, PHOTO = ('new', 'code_verified', 'done', 'photo')
 
 class User(Base, AbstractUser):
     USER_ROLE = (
@@ -34,14 +34,14 @@ class User(Base, AbstractUser):
     phone_number = models.CharField(max_lenght=17, unique=True, null=True, blank=True)
     email = models.EmailField(unique=True, null=True, blank=True)
     bio = models.TextField(null=True, blank=True)
-    avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
 
     @property
     def fullname(self):
-        return f"{self.first_name} {self.last_name}"
+        return f'{self.first_name} {self.last_name}'
 
     def create_code(self, auth_type):
-        code = "".join([str(random.ranint(0,9)) for _ in range(4)])
+        code = ''.join([str(random.ranint(0,9)) for _ in range(4)])
         UserConfirmation.objects.create(
             user=self,
             code=code,
@@ -52,16 +52,16 @@ class User(Base, AbstractUser):
 
     def check_username(self):
         if not self.username:
-            temporary_username = f"slave_{uuid.uuid4().__str__().split("-")[-1]}"
+            temporary_username = f'slave_{uuid.uuid4().__str__().split('-')[-1]}'
             self.username = temporary_username
 
     def check_pass(self):
         if not self.password:
-            temporary_password = f"{uuid.uuid4().__str__().split("-")[-1]}"
+            temporary_password = f'{uuid.uuid4().__str__().split('-')[-1]}'
             self.password = temporary_password
 
     def check_passwords_hash(self):
-        if not self.password.startswith("pbkdf"):
+        if not self.password.startswith('pbkdf'):
             self.password = make_password(self.password)
 
     def check_email(self):
@@ -72,8 +72,8 @@ class User(Base, AbstractUser):
         refresh = RefreshToken.for_user(self)
 
         return {
-            "refresh" : str(refresh),
-            "access" : str(refresh.access_token)
+            'refresh' : str(refresh),
+            'access' : str(refresh.access_token)
         }
 
     def clean(self) -> None:
