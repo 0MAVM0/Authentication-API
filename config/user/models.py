@@ -1,3 +1,4 @@
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
@@ -66,6 +67,14 @@ class User(Base, AbstractUser):
     def check_email(self):
         if self.email:
             self.email = self.email.lower()
+    
+    def token(self):
+        refresh = RefreshToken.for_user(self)
+
+        return {
+            "refresh" : str(refresh),
+            "access" : str(refresh.access_token)
+        }
 
     def clean(self) -> None:
         self.check_username()
