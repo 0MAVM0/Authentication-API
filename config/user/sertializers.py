@@ -24,12 +24,23 @@ class SignUpSerializer(serializers.ModelSerializer):
         data = self.auth_validate(data)
 
         return data
+    
+    def validate_email_or_phone_number(self, value):
+        value = str(value).lower()
+
+        if value and User.objects.filter(email=value).exists():
+            raise ValidationError('This Email Has Registered Before')
+        elif value and User.objects.filter(phone_number=value).exists():
+            raise ValidationError('This Phone Number Has Registered Before')
+
+        return value
 
     def create(self, validated_data):
         user = super(SignUpSerializer, self).create(validated_data)
+
         if user.auth_type == VIA_EMAIL:
             code = user.create_code(VIA_EMAIL)
-        else:
+        elif user.auth_type == VIA_NUMBER:
             code = user.create_code(VIA_NUMBER)
 
         return user
