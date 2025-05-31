@@ -36,7 +36,7 @@ class SignUpSerializer(serializers.ModelSerializer):
             # send_phone_code(user.phone_number, code)
 
         user.save()
-        print(f"User created: {user.email} with auth type: {user.auth_type} and code: {code}")
+        print(f'User created: {user.email} with auth type: {user.auth_type} and code: {code}')
 
         return user
 
@@ -52,20 +52,20 @@ class SignUpSerializer(serializers.ModelSerializer):
         user_input = str(data.get('email_phone_number')).lower()
         input_type = check_email_or_phone(user_input)
 
-        if input_type == "email":
+        if input_type == 'email':
             data = {
-                "email": user_input,
-                "auth_type": VIA_EMAIL
+                'email': user_input,
+                'auth_type': VIA_EMAIL
             }
-        elif input_type == "phone":
+        elif input_type == 'phone':
             data = {
-                "phone_number": user_input,
-                "auth_type": VIA_PHONE
+                'phone_number': user_input,
+                'auth_type': VIA_PHONE
             }
         else:
             data = {
                 'success': False,
-                'message': "You must send email or phone number"
+                'message': 'You must send email or phone number'
             }
 
             raise ValidationError(data)
@@ -77,15 +77,15 @@ class SignUpSerializer(serializers.ModelSerializer):
 
         if value and User.objects.filter(email=value).exists():
             data = {
-                "success": False,
-                "message": "Bu email allaqachon ma'lumotlar bazasida bor"
+                'success': False,
+                'message': 'This Email Already Exists'
             }
 
             raise ValidationError(data)
         elif value and User.objects.filter(phone_number=value).exists():
             data = {
-                "success": False,
-                "message": "Bu telefon raqami allaqachon ma'lumotlar bazasida bor"
+                'success': False,
+                'message': 'This Phone Number Is Already Authenticated'
             }
 
             raise ValidationError(data)

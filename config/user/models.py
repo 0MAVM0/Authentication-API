@@ -9,8 +9,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from shared.models import BaseModel
 
-ORDINARY_USER, MANAGER, ADMIN = ("ordinary_user", 'manager', 'admin')
-VIA_EMAIL, VIA_PHONE = ("via_email", "via_phone")
+ORDINARY_USER, MANAGER, ADMIN = ('ordinary_user', 'manager', 'admin')
+VIA_EMAIL, VIA_PHONE = ('via_email', 'via_phone')
 NEW, CODE_VERIFIED, DONE, PHOTO_DONE = ('new', 'code_verified', 'done', 'photo_done')
 
 
@@ -36,18 +36,17 @@ class User(AbstractUser, BaseModel):
     auth_status = models.CharField(max_length=31, choices=AUTH_STATUS, default=NEW)
     email = models.EmailField(null=True, blank=True, unique=True)
     phone_number = models.CharField(max_length=13, null=True, blank=True, unique=True)
-    photo = models.ImageField(upload_to='user_photos/', null=True, blank=True,
-                              validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'heic', 'heif'])])
+    photo = models.ImageField(upload_to='user_photos/', null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'heic', 'heif'])])
 
     def __str__(self):
         return self.username
 
     @property
     def full_name(self):
-        return f"{self.first_name} {self.last_name}"
+        return f'{self.first_name} {self.last_name}'
 
     def create_verify_code(self, verify_type):
-        code = "".join([str(random.randint(0, 10000) % 10) for _ in range(4)])
+        code = ''.join([str(random.randint(0, 10000) % 10) for _ in range(4)])
         UserConfirmation.objects.create(
             user_id=self.id,
             verify_type=verify_type,
@@ -57,19 +56,19 @@ class User(AbstractUser, BaseModel):
 
     def check_username(self):
         if not self.username:
-            temp_username = f'instagram-{uuid.uuid4().__str__().split("-")[-1]}' # instagram-23324fsdf
+            temp_username = f'instagram-{uuid.uuid4().__str__().split('-')[-1]}'
             while User.objects.filter(username=temp_username):
-                temp_username = f"{temp_username}{random.randint(0,9)}"
+                temp_username = f'{temp_username}{random.randint(0,9)}'
             self.username = temp_username
 
     def check_email(self):
         if self.email:
-            normalize_email = self.email.lower()  # aKhamdjon@gmail.com -> akhamdjon@gmail.com
+            normalize_email = self.email.lower()
             self.email = normalize_email
 
     def check_pass(self):
         if not self.password:
-            temp_password = f'password-{uuid.uuid4().__str__().split("-")[-1]}' #  123456mfdsjfkd
+            temp_password = f'password-{uuid.uuid4().__str__().split('-')[-1]}'
             self.password = temp_password
 
     def hashing_password(self):
@@ -79,8 +78,8 @@ class User(AbstractUser, BaseModel):
     def token(self):
         refresh = RefreshToken.for_user(self)
         return {
-            "access": str(refresh.access_token),
-            "refresh_token": str(refresh)
+            'access': str(refresh.access_token),
+            'refresh_token': str(refresh)
         }
 
     def save(self, *args, **kwargs):
