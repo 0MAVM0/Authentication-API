@@ -1,8 +1,10 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from django.contrib.auth.password_validation import validate_password
+
 from shared.utilities import check_email_or_phone
-from user.models import User, VIA_PHONE, VIA_EMAIL
+from user.models import User, VIA_PHONE, VIA_EMAIL, CODE_VERIFIED, DONE
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -17,7 +19,8 @@ class SignUpSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'auth_type',
-            'auth_status'
+            'auth_status',
+            'email_phone_number'
         )
         extra_kwargs = {
             'auth_type': { 'read_only' : True, 'required' : False},
@@ -97,3 +100,40 @@ class SignUpSerializer(serializers.ModelSerializer):
         data.update(instance.token())
 
         return data
+
+
+class ChangeUserSerializer(serializers.Serializer):
+    first_name = serializers.CharField(write_only=True, required=True)
+    last_name = serializers.CharField(write_only=True, required=True)
+    username = serializers.CharField(write_only=True, required=True)
+    password1 = serializers.CharField(write_only=True, required=True)
+    password2 = serializers.CharField(write_only=True, required=True)
+
+    def validate(self, data):
+        password1 = data.get('password1', None)
+        password2 = data.get('password2', None)
+
+        if password1 != password2:
+            raise ValidationError({
+                'message' : 'Passwords Do Not Match'
+            })
+        if password1:
+            validate_password(password2)
+            validate_password(password1)
+
+        return data
+    
+    def update(self, instance, validated_data):
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
+        instance.username = validated_data.get('username', instance.username)
+
+        if validated_data.get('password1'):
+            instance.set_password(validated_data.get('password2'))
+
+        if instance.auth_status == CODE_VERIFIED:
+            instance.auth_status = DONE
+
+        instance.save()
+
+        return instance
